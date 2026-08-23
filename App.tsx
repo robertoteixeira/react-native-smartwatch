@@ -1,15 +1,15 @@
+import {useState} from 'react';
 import {
-  Alert,
   Pressable,
   StatusBar,
   StyleSheet,
   Text,
   View,
-} from 'react-native'
+} from 'react-native';
 import {
   SafeAreaProvider,
   SafeAreaView,
-} from 'react-native-safe-area-context'
+} from 'react-native-safe-area-context';
 
 function App() {
   return (
@@ -21,11 +21,10 @@ function App() {
 }
 
 function DashboardScreen() {
+  const [isPreparingToPair, setIsPreparingToPair] = useState(false);
+
   function handlePairWatch() {
-    Alert.alert(
-      'Pair a watch',
-      'Device discovery will be added in a future step.'
-    );
+    setIsPreparingToPair(currentValue => !currentValue);
   }
 
   return (
@@ -44,21 +43,29 @@ function DashboardScreen() {
             <View style={styles.watchScreen} />
           </View>
 
-          <Text style={styles.title}>No watch connected</Text>
-          <Text style={styles.subtitle}>
-            Pair a compatible smartwatch to get started.
+          <Text style={styles.cardTitle}>
+            {isPreparingToPair ? 'Ready to scan' : 'No watch connected'}
+          </Text>
+
+          <Text style={styles.cardDescription}>
+            {isPreparingToPair
+              ? 'Bluetooth device discovery will be added in the next pairing step.'
+              : 'Pair a compatible smartwatch to get started.'}
           </Text>
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Pair a smartwatch"
+            accessibilityLabel={
+              isPreparingToPair ? 'Cancel smartwatch pairing' : 'Pair a smartwatch'
+            }
             onPress={handlePairWatch}
             style={({pressed}) => [
               styles.pairButton,
               pressed && styles.pairButtonPressed,
-            ]}
-          >
-            <Text style={styles.pairButtonText}>Pair a watch</Text>
+            ]}>
+            <Text style={styles.pairButtonText}>
+              {isPreparingToPair ? 'Cancel' : 'Pair a watch'}
+            </Text>
           </Pressable>
         </View>
 
