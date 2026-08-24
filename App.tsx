@@ -20,10 +20,15 @@ function App() {
   );
 }
 
+type PairingCardProps = {
+  isPreparingToPair: boolean;
+  onTogglePairing: () => void; 
+}
+
 function DashboardScreen() {
   const [isPreparingToPair, setIsPreparingToPair] = useState(false);
 
-  function handlePairWatch() {
+  function handleTogglePairing() {
     setIsPreparingToPair(currentValue => !currentValue);
   }
 
@@ -38,40 +43,53 @@ function DashboardScreen() {
           </Text>
         </View>
 
-        <View style={styles.emptyCard}>
-          <View style={styles.watchPlaceholder}>
-            <View style={styles.watchScreen} />
-          </View>
-
-          <Text style={styles.cardTitle}>
-            {isPreparingToPair ? 'Ready to scan' : 'No watch connected'}
-          </Text>
-
-          <Text style={styles.cardDescription}>
-            {isPreparingToPair
-              ? 'Bluetooth device discovery will be added in the next pairing step.'
-              : 'Pair a compatible smartwatch to get started.'}
-          </Text>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              isPreparingToPair ? 'Cancel smartwatch pairing' : 'Pair a smartwatch'
-            }
-            onPress={handlePairWatch}
-            style={({pressed}) => [
-              styles.pairButton,
-              pressed && styles.pairButtonPressed,
-            ]}>
-            <Text style={styles.pairButtonText}>
-              {isPreparingToPair ? 'Cancel' : 'Pair a watch'}
-            </Text>
-          </Pressable>
-        </View>
-
+        <PairingCard
+          isPreparingToPair={isPreparingToPair}
+          onTogglePairing={handleTogglePairing}
+        />
       </View>
     </SafeAreaView>
-  )
+  );
+}
+
+function PairingCard({
+  isPreparingToPair,
+  onTogglePairing,
+}: PairingCardProps) {
+  return (
+    <View style={styles.emptyCard}>
+      <View style={styles.watchPlaceholder}>
+        <View style={styles.watchScreen} />
+      </View>
+
+      <Text style={styles.cardTitle}>
+        {isPreparingToPair ? 'Ready to scan' : 'No watch connected'}
+      </Text>
+
+      <Text style={styles.cardDescription}>
+        {isPreparingToPair
+          ? 'Bluetooth device discovery will be added in the next pairing step.'
+          : 'Pair a compatible smartwatch to get started.'}
+      </Text>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          isPreparingToPair
+            ? 'Cancel smartwatch pairing'
+            : 'Pair a smartwatch'
+        }
+        onPress={onTogglePairing}
+        style={({pressed}) => [
+          styles.pairButton,
+          pressed && styles.pairButtonPressed,
+        ]}>
+        <Text style={styles.pairButtonText}>
+          {isPreparingToPair ? 'Cancel' : 'Pair a watch'}
+        </Text>
+      </Pressable>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
