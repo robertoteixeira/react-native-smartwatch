@@ -1,6 +1,5 @@
 import {useState} from 'react';
 import {
-  Alert,
   Pressable,
   StatusBar,
   StyleSheet,
@@ -35,6 +34,11 @@ type DiscoveredWatch = {
   signalStrength: 'strong' | 'medium' | 'weak';
 }
 
+type ConnectedWatchCardProps = {
+  watch: DiscoveredWatch;
+  onDisconnect: () => void;
+}
+
 const previewWatches: DiscoveredWatch[] = [
   {
     id: 'preview-watch-1',
@@ -51,6 +55,7 @@ const previewWatches: DiscoveredWatch[] = [
 function DashboardScreen() {
   const [isPreparingToPair, setIsPreparingToPair] = useState(false);
   const [selectedWatchId, setSelectedWatchId] = useState<string | null>(null);
+  const [connectedWatch, setConnectedWatch] = useState<DiscoveredWatch | null>(null);
 
   function handleTogglePairing() {
     setIsPreparingToPair(currentValue => !currentValue);
@@ -70,10 +75,13 @@ function DashboardScreen() {
       return;
     }
 
-    Alert.alert(
-      'Watch selected',
-      `${selectedWatch.name} is ready for the future BLE connection step.`,
-    );
+    setConnectedWatch(selectedWatch);
+    setIsPreparingToPair(false);
+    setSelectedWatchId(null);
+  }
+
+  function handleDisconnect() {
+    setConnectedWatch(null);
   }
 
   return (
@@ -87,6 +95,12 @@ function DashboardScreen() {
           </Text>
         </View>
 
+      {connectedWatch ? (
+        <ConnectedWatchCard
+          watch={connectedWatch}
+          onDisconnect={handleDisconnect}
+        />
+      ) : (
         <PairingCard
           isPreparingToPair={isPreparingToPair}
           selectedWatchId={selectedWatchId}
@@ -94,6 +108,7 @@ function DashboardScreen() {
           onConfirmSelection={handleConfirmSelection}
           onTogglePairing={handleTogglePairing}
         />
+      )}
       </View>
     </SafeAreaView>
   );
@@ -203,6 +218,40 @@ function PairingCard({
       </Pressable>
     </View>
   );
+}
+
+function ConnectedWatchCard({
+  watch,
+  onDisconnect
+}: ConnectedWatchCardProps) {
+  return (
+    <View style={styles.connectedCard}>
+      <View style={styles.connectionHeader}>
+        <View style= {styles.connectedIndicator} />
+        <Text style={styles.connectedLabel}>Connected preview</Text>
+      </View>
+
+      <View style={styles.watchPlaceholder}>
+        <View style= {styles.watchScreen} />
+      </View>
+
+      <Text style={styles.cardTitle}>{watch.name}</Text>
+      <Text style={styles.cardDescription}>
+        Device information will appear here after a real BLE connection.
+      </Text>
+
+      <Pressable
+        accessibilityRole='button'
+        accessibilityLabel={`Disconnect ${watch.name}`}
+        onPress={onDisconnect}
+        style={({pressed}) => [
+          styles.disconnectButton,
+          pressed && styles.pairButtonPressed,
+        ]}>
+        <Text style={styles.disconnectButtonText}>Disconnect preview</Text>
+      </Pressable>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -356,7 +405,49 @@ const styles = StyleSheet.create({
   },
   deviceRowPressed: {
     opacity: 0.7,
-  },  
+  },
+  connectedCard: {
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    marginTop: 32,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  connectionHeader: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  connectedIndicator: {
+    backgroundColor: '#28A66A',
+    borderRadius: 5,
+    height: 10,
+    marginRight: 8,
+    width: 10,
+  },
+  connectedLabel: {
+    color: '#24855A',
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  disconnectButton: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    borderColor: '#D5DBE3',
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 24,
+    paddingVertical: 15,
+  },
+  disconnectButtonText: {
+    color: '#46515F',
+    fontSize: 16,
+    fontWeight: '700',
+  },    
 });
 
 export default App;
