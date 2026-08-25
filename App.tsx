@@ -10,6 +10,7 @@ import {
   SafeAreaProvider,
   SafeAreaView,
 } from 'react-native-safe-area-context';
+import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
 
 function App() {
   return (
@@ -26,12 +27,6 @@ type PairingCardProps = {
   onSelectWatch: (watchId: string) => void;
   onConfirmSelection: () => void;
   onTogglePairing: () => void; 
-}
-
-type DiscoveredWatch = {
-  id: string;
-  name: string;
-  signalStrength: 'strong' | 'medium' | 'weak';
 }
 
 type ConnectedWatchCardProps = {
