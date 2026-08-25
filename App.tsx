@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {
+  Alert,
   Pressable,
   StatusBar,
   StyleSheet,
@@ -24,6 +25,7 @@ type PairingCardProps = {
   isPreparingToPair: boolean;
   selectedWatchId: string | null;
   onSelectWatch: (watchId: string) => void;
+  onConfirmSelection: () => void;
   onTogglePairing: () => void; 
 }
 
@@ -59,6 +61,21 @@ function DashboardScreen() {
     setSelectedWatchId(watchId);
   }
 
+  function handleConfirmSelection() {
+    const selectedWatch = previewWatches.find(
+      watch => watch.id === selectedWatchId,
+    );
+
+    if (!selectedWatch) {
+      return;
+    }
+
+    Alert.alert(
+      'Watch selected',
+      `${selectedWatch.name} is ready for the future BLE connection step.`,
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
@@ -74,6 +91,7 @@ function DashboardScreen() {
           isPreparingToPair={isPreparingToPair}
           selectedWatchId={selectedWatchId}
           onSelectWatch={handleSelectWatch}
+          onConfirmSelection={handleConfirmSelection}
           onTogglePairing={handleTogglePairing}
         />
       </View>
@@ -85,8 +103,11 @@ function PairingCard({
   isPreparingToPair,
   selectedWatchId,
   onSelectWatch,
+  onConfirmSelection,
   onTogglePairing,
 }: PairingCardProps) {
+  const canConnect = selectedWatchId !== null;
+
   return (
     <View style={styles.emptyCard}>
       <View style={styles.watchPlaceholder}>
@@ -138,6 +159,27 @@ function PairingCard({
         </View>
       )}
 
+      {isPreparingToPair && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{disabled: !canConnect}}
+          disabled={!canConnect}
+          onPress={onConfirmSelection}
+          style={({pressed}) => [
+            styles.connectButton,
+            !canConnect && styles.connectButtonDisabled,
+            pressed && canConnect && styles.pairButtonPressed,
+          ]}>
+          <Text
+            style={[
+              styles.connectButtonText,
+              !canConnect && styles.connectButtonTextDisabled,
+            ]}>
+            Connect
+          </Text>
+        </Pressable>
+      )}
+
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={
@@ -148,9 +190,14 @@ function PairingCard({
         onPress={onTogglePairing}
         style={({pressed}) => [
           styles.pairButton,
+          isPreparingToPair && styles.cancelButton,
           pressed && styles.pairButtonPressed,
         ]}>
-        <Text style={styles.pairButtonText}>
+        <Text
+          style={[
+            styles.pairButtonText,
+            isPreparingToPair && styles.cancelButtonText,
+          ]}>
           {isPreparingToPair ? 'Cancel' : 'Pair a watch'}
         </Text>
       </Pressable>
@@ -236,6 +283,34 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  connectButton: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    backgroundColor: '#1769E0',
+    borderRadius: 14,
+    marginTop: 24,
+    paddingVertical: 15,
+  },
+  connectButtonDisabled: {
+    backgroundColor: '#DCE2E9',
+  },
+  connectButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  connectButtonTextDisabled: {
+    color: '#8A95A3',
+  },
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderColor: '#D5DBE3',
+    borderWidth: 1,
+    marginTop: 12,
+  },
+  cancelButtonText: {
+    color: '#46515F',
   },
   deviceList: {
   alignSelf: 'stretch',
