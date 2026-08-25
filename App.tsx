@@ -22,6 +22,8 @@ function App() {
 
 type PairingCardProps = {
   isPreparingToPair: boolean;
+  selectedWatchId: string | null;
+  onSelectWatch: (watchId: string) => void;
   onTogglePairing: () => void; 
 }
 
@@ -46,9 +48,15 @@ const previewWatches: DiscoveredWatch[] = [
 
 function DashboardScreen() {
   const [isPreparingToPair, setIsPreparingToPair] = useState(false);
+  const [selectedWatchId, setSelectedWatchId] = useState<string | null>(null);
 
   function handleTogglePairing() {
     setIsPreparingToPair(currentValue => !currentValue);
+    setSelectedWatchId(null);
+  }
+
+  function handleSelectWatch(watchId: string) {
+    setSelectedWatchId(watchId);
   }
 
   return (
@@ -64,6 +72,8 @@ function DashboardScreen() {
 
         <PairingCard
           isPreparingToPair={isPreparingToPair}
+          selectedWatchId={selectedWatchId}
+          onSelectWatch={handleSelectWatch}
           onTogglePairing={handleTogglePairing}
         />
       </View>
@@ -73,6 +83,8 @@ function DashboardScreen() {
 
 function PairingCard({
   isPreparingToPair,
+  selectedWatchId,
+  onSelectWatch,
   onTogglePairing,
 }: PairingCardProps) {
   return (
@@ -95,16 +107,34 @@ function PairingCard({
         <View style={styles.deviceList}>
           <Text style={styles.deviceListTitle}>Nearby watches</Text>
 
-          {previewWatches.map(watch => (
-            <View key={watch.id} style={styles.deviceRow}>
-              <View>
-                <Text style={styles.deviceName}>{watch.name}</Text>
-                <Text style={styles.deviceSignal}>{watch.signalStrength} signal</Text>
-              </View>
+          {previewWatches.map(watch => {
+            const isSelected = watch.id === selectedWatchId;
 
-              <Text style={styles.deviceAction}>Select</Text>
-            </View>  
-          ))}
+            return (
+              <Pressable
+                key={watch.id}
+                accessibilityRole="button"
+                accessibilityLabel={`Select ${watch.name}`}
+                accessibilityState={{selected: isSelected}}
+                onPress={() => onSelectWatch(watch.id)}
+                style={({pressed}) => [
+                  styles.deviceRow,
+                  isSelected && styles.deviceRowSelected,
+                  pressed && styles.deviceRowPressed,
+                ]}>
+                <View>
+                  <Text style={styles.deviceName}>{watch.name}</Text>
+                  <Text style={styles.deviceSignal}>
+                    {watch.signalStrength} signal
+                  </Text>
+                </View>
+
+                <Text style={styles.deviceAction}>
+                  {isSelected ? 'Selected' : 'Select'}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       )}
 
@@ -245,6 +275,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  deviceRowSelected: {
+    backgroundColor: '#EDF4FF',
+    borderColor: '#1769E0',
+  },
+  deviceRowPressed: {
+    opacity: 0.7,
+  },  
 });
 
 export default App;
