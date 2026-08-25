@@ -25,6 +25,25 @@ type PairingCardProps = {
   onTogglePairing: () => void; 
 }
 
+type DiscoveredWatch = {
+  id: string;
+  name: string;
+  signalStrength: 'strong' | 'medium' | 'weak';
+}
+
+const previewWatches: DiscoveredWatch[] = [
+  {
+    id: 'preview-watch-1',
+    name: 'Smart Watch',
+    signalStrength: 'strong',
+  },
+  {
+    id: 'preview-watch-2',
+    name: 'Watch 7',
+    signalStrength: 'medium',
+  },
+];
+
 function DashboardScreen() {
   const [isPreparingToPair, setIsPreparingToPair] = useState(false);
 
@@ -68,9 +87,26 @@ function PairingCard({
 
       <Text style={styles.cardDescription}>
         {isPreparingToPair
-          ? 'Bluetooth device discovery will be added in the next pairing step.'
+          ? 'Choose the watch you want to connect.'
           : 'Pair a compatible smartwatch to get started.'}
       </Text>
+
+      {isPreparingToPair && (
+        <View style={styles.deviceList}>
+          <Text style={styles.deviceListTitle}>Nearby watches</Text>
+
+          {previewWatches.map(watch => (
+            <View key={watch.id} style={styles.deviceRow}>
+              <View>
+                <Text style={styles.deviceName}>{watch.name}</Text>
+                <Text style={styles.deviceSignal}>{watch.signalStrength} signal</Text>
+              </View>
+
+              <Text style={styles.deviceAction}>Select</Text>
+            </View>  
+          ))}
+        </View>
+      )}
 
       <Pressable
         accessibilityRole="button"
@@ -169,6 +205,44 @@ const styles = StyleSheet.create({
   pairButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: '700',
+  },
+  deviceList: {
+  alignSelf: 'stretch',
+  marginTop: 24,
+  },
+  deviceListTitle: {
+    color: '#687382',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  deviceRow: {
+    alignItems: 'center',
+    borderColor: '#E2E7ED',
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    padding: 16,
+  },
+  deviceName: {
+    color: '#17202A',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deviceSignal: {
+    color: '#687382',
+    fontSize: 13,
+    marginTop: 4,
+    textTransform: 'capitalize',
+  },
+  deviceAction: {
+    color: '#1769E0',
+    fontSize: 14,
     fontWeight: '700',
   },
 });
