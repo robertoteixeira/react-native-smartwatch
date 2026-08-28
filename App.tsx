@@ -11,6 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
+import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 
 function App() {
   return (
@@ -27,11 +28,6 @@ type PairingCardProps = {
   onSelectWatch: (watchId: string) => void;
   onConfirmSelection: () => void;
   onTogglePairing: () => void; 
-}
-
-type ConnectedWatchCardProps = {
-  watch: DiscoveredWatch;
-  onDisconnect: () => void;
 }
 
 const previewWatches: DiscoveredWatch[] = [
@@ -215,40 +211,6 @@ function PairingCard({
   );
 }
 
-function ConnectedWatchCard({
-  watch,
-  onDisconnect
-}: ConnectedWatchCardProps) {
-  return (
-    <View style={styles.connectedCard}>
-      <View style={styles.connectionHeader}>
-        <View style= {styles.connectedIndicator} />
-        <Text style={styles.connectedLabel}>Connected preview</Text>
-      </View>
-
-      <View style={styles.watchPlaceholder}>
-        <View style= {styles.watchScreen} />
-      </View>
-
-      <Text style={styles.cardTitle}>{watch.name}</Text>
-      <Text style={styles.cardDescription}>
-        Device information will appear here after a real BLE connection.
-      </Text>
-
-      <Pressable
-        accessibilityRole='button'
-        accessibilityLabel={`Disconnect ${watch.name}`}
-        onPress={onDisconnect}
-        style={({pressed}) => [
-          styles.disconnectButton,
-          pressed && styles.pairButtonPressed,
-        ]}>
-        <Text style={styles.disconnectButtonText}>Disconnect preview</Text>
-      </Pressable>
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -401,48 +363,6 @@ const styles = StyleSheet.create({
   deviceRowPressed: {
     opacity: 0.7,
   },
-  connectedCard: {
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    marginTop: 32,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  connectionHeader: {
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  connectedIndicator: {
-    backgroundColor: '#28A66A',
-    borderRadius: 5,
-    height: 10,
-    marginRight: 8,
-    width: 10,
-  },
-  connectedLabel: {
-    color: '#24855A',
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  disconnectButton: {
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    borderColor: '#D5DBE3',
-    borderRadius: 14,
-    borderWidth: 1,
-    marginTop: 24,
-    paddingVertical: 15,
-  },
-  disconnectButtonText: {
-    color: '#46515F',
-    fontSize: 16,
-    fontWeight: '700',
-  },    
 });
 
 export default App;
