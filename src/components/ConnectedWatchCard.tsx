@@ -34,7 +34,8 @@ export function ConnectedWatchCard({
         style={({pressed}) => [
           styles.disconnectButton,
           pressed && styles.buttonPressed,
-        ]}>
+        ]}
+      >
         <Text style={styles.disconnectButtonText}>Disconnect preview</Text>
       </Pressable>
     </View>
