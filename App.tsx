@@ -1,16 +1,21 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {StatusBar, StyleSheet, Text, View} from 'react-native';
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 import {PairingCard} from './src/components/PairingCard';
 import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
 
-const previewWatches: DiscoveredWatch[] = [
-  {id: 'preview-watch-1', name: 'Smart Watch', signalStrength: 'strong'},
-  {id: 'preview-watch-2', name: 'Watch 7', signalStrength: 'medium'},
+const previewScanResults: readonly DiscoveredWatch[] = [
+  {
+    id: 'preview-watch-1',
+    name: 'Smart Watch',
+    signalStrength: 'strong',
+  },
+  {
+    id: 'preview-watch-2',
+    name: 'Watch 7',
+    signalStrength: 'medium',
+  },
 ];
 
 function App() {
@@ -25,8 +30,33 @@ function App() {
 function DashboardScreen() {
   const [isPreparingToPair, setIsPreparingToPair] = useState(false);
   const [selectedWatchId, setSelectedWatchId] = useState<string | null>(null);
-  const [connectedWatch, setConnectedWatch] =
-    useState<DiscoveredWatch | null>(null);
+  const [connectedWatch, setConnectedWatch] = useState<DiscoveredWatch | null>(
+    null,
+  );
+  const [discoveredWatches, setDiscoveredWatches] = useState<
+    readonly DiscoveredWatch[]
+  >([]);
+  const [isScanning, setIsScanning] = useState(false);
+
+  useEffect(() => {
+    if (!isPreparingToPair) {
+      setDiscoveredWatches([]);
+      setIsScanning(false);
+      return;
+    }
+
+    setDiscoveredWatches([]);
+    setIsScanning(true);
+
+    const scanTimer = setTimeout(() => {
+      setDiscoveredWatches(previewScanResults);
+      setIsScanning(false);
+    }, 1500);
+
+    return () => {
+      clearTimeout(scanTimer);
+    };
+  }, [isPreparingToPair]);
 
   function handleTogglePairing() {
     setIsPreparingToPair(currentValue => !currentValue);
@@ -38,7 +68,7 @@ function DashboardScreen() {
   }
 
   function handleConfirmSelection() {
-    const selectedWatch = previewWatches.find(
+    const selectedWatch = discoveredWatches.find(
       watch => watch.id === selectedWatchId,
     );
 
@@ -73,7 +103,8 @@ function DashboardScreen() {
           />
         ) : (
           <PairingCard
-            watches={previewWatches}
+            watches={discoveredWatches}
+            isScanning={isScanning}
             isPreparingToPair={isPreparingToPair}
             selectedWatchId={selectedWatchId}
             onSelectWatch={handleSelectWatch}
