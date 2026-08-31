@@ -5,6 +5,7 @@ import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 import {PairingCard} from './src/components/PairingCard';
 import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
 import {requestBluetoothPermissions} from './src/ble/requestBluetoothPermissions';
+import {useBluetoothState} from './src/ble/useBluetoothState';
 
 const previewScanResults: readonly DiscoveredWatch[] = [
   {
@@ -38,9 +39,10 @@ function DashboardScreen() {
     readonly DiscoveredWatch[]
   >([]);
   const [isScanning, setIsScanning] = useState(false);
+  const bluetoothState = useBluetoothState(isPreparingToPair);
 
   useEffect(() => {
-    if (!isPreparingToPair) {
+    if (!isPreparingToPair || bluetoothState !== 'PoweredOn') {
       setDiscoveredWatches([]);
       setIsScanning(false);
       return;
@@ -57,7 +59,7 @@ function DashboardScreen() {
     return () => {
       clearTimeout(scanTimer);
     };
-  }, [isPreparingToPair]);
+  }, [bluetoothState, isPreparingToPair]);
 
   async function handleTogglePairing() {
     if (isPreparingToPair) {
@@ -111,6 +113,12 @@ function DashboardScreen() {
           <Text style={styles.subtitle}>
             Connect a watch to see its status and activity.
           </Text>
+
+          {isPreparingToPair && (
+            <Text style={styles.bluetoothState}>
+              Bluetooth: {bluetoothState}
+            </Text>
+          )}
         </View>
 
         {connectedWatch ? (
@@ -150,6 +158,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   subtitle: {color: '#5B6472', fontSize: 16, lineHeight: 23, marginTop: 8},
+  bluetoothState: {
+    color: '#687382',
+    fontSize: 13,
+    marginTop: 12,
+  },
 });
 
 export default App;
