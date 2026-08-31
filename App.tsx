@@ -1,9 +1,10 @@
 import {useEffect, useState} from 'react';
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
+import {Alert, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 import {PairingCard} from './src/components/PairingCard';
 import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
+import {requestBluetoothPermissions} from './src/ble/requestBluetoothPermissions';
 
 const previewScanResults: readonly DiscoveredWatch[] = [
   {
@@ -58,8 +59,24 @@ function DashboardScreen() {
     };
   }, [isPreparingToPair]);
 
-  function handleTogglePairing() {
-    setIsPreparingToPair(currentValue => !currentValue);
+  async function handleTogglePairing() {
+    if (isPreparingToPair) {
+      setIsPreparingToPair(false);
+      setSelectedWatchId(null);
+      return;
+    }
+
+    const permissionGranted = await requestBluetoothPermissions();
+
+    if (!permissionGranted) {
+      Alert.alert(
+        'Bluetooth permission required',
+        'Allow access to nearby devices to discover your smartwatch.',
+      );
+      return;
+    }
+
+    setIsPreparingToPair(true);
     setSelectedWatchId(null);
   }
 
