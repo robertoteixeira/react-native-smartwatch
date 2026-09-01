@@ -15,6 +15,8 @@ import {requestBluetoothPermissions} from './src/ble/requestBluetoothPermissions
 import {useBluetoothState} from './src/ble/useBluetoothState';
 import {mapBleDeviceToDiscoveredWatch} from './src/ble/mapBleDeviceToDiscoveredWatch';
 import {useBleScan} from './src/ble/useBleScan';
+import {connectToBleDevice} from './src/ble/connectToBleDevice';
+import {disconnectFromBleDevice} from './src/ble/disconnectFromBleDevice';
 
 function App() {
   return (
@@ -31,10 +33,10 @@ function DashboardScreen() {
   const [connectedWatch, setConnectedWatch] = useState<DiscoveredWatch | null>(
     null,
   );
+  const [isConnecting, setIsConnecting] = useState(false);
+
   const bluetoothState = useBluetoothState(isPreparingToPair);
-
   const canScan = isPreparingToPair && bluetoothState === 'PoweredOn';
-
   const {devices, isScanning} = useBleScan(canScan);
 
   const discoveredWatches = useMemo(
@@ -67,7 +69,7 @@ function DashboardScreen() {
     setSelectedWatchId(watchId);
   }
 
-  function handleConfirmSelection() {
+  async function handleConfirmSelection() {
     const selectedWatch = discoveredWatches.find(
       watch => watch.id === selectedWatchId,
     );
@@ -76,13 +78,41 @@ function DashboardScreen() {
       return;
     }
 
-    setConnectedWatch(selectedWatch);
-    setIsPreparingToPair(false);
-    setSelectedWatchId(null);
+    setIsConnecting(true);
+
+    try {
+      await connectToBleDevice(selectedWatch.id);
+
+      setConnectedWatch(selectedWatch);
+      setIsPreparingToPair(false);
+      setSelectedWatchId(null);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'An unknown Bluetooth error occurred.';
+      Alert.alert('Unable to connect', message);
+    } finally {
+      setIsConnecting(false);
+    }
   }
 
-  function handleDisconnect() {
-    setConnectedWatch(null);
+  async function handleDisconnect() {
+    if (!connectedWatch) {
+      return;
+    }
+
+    try {
+      await disconnectFromBleDevice(connectedWatch.id);
+      setConnectedWatch(null);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'An unknown Bluetooth error occurred.';
+
+      Alert.alert('Unable to disconnect', message);
+    }
   }
 
   return (
@@ -115,6 +145,7 @@ function DashboardScreen() {
           <PairingCard
             watches={discoveredWatches}
             isScanning={isScanning}
+            isConnecting={isConnecting}
             isPreparingToPair={isPreparingToPair}
             selectedWatchId={selectedWatchId}
             onSelectWatch={handleSelectWatch}

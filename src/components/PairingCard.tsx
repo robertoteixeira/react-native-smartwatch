@@ -11,6 +11,7 @@ import type {DiscoveredWatch} from '../models/DiscoveredWatch';
 type PairingCardProps = {
   watches: readonly DiscoveredWatch[];
   isScanning: boolean;
+  isConnecting: boolean;
   isPreparingToPair: boolean;
   selectedWatchId: string | null;
   onSelectWatch: (watchId: string) => void;
@@ -21,13 +22,14 @@ type PairingCardProps = {
 export function PairingCard({
   watches,
   isScanning,
+  isConnecting,
   isPreparingToPair,
   selectedWatchId,
   onSelectWatch,
   onConfirmSelection,
   onTogglePairing,
 }: PairingCardProps) {
-  const canConnect = selectedWatchId !== null;
+  const canConnect = selectedWatchId !== null && !isConnecting;
 
   return (
     <View style={styles.emptyCard}>
@@ -110,21 +112,24 @@ export function PairingCard({
               !canConnect && styles.connectButtonTextDisabled,
             ]}
           >
-            Connect
+            {isConnecting ? 'Connecting…' : 'Connect'}
           </Text>
         </Pressable>
       )}
 
       <Pressable
         accessibilityRole="button"
+        accessibilityState={{disabled: isConnecting}}
         accessibilityLabel={
           isPreparingToPair ? 'Cancel smartwatch pairing' : 'Pair a smartwatch'
         }
+        disabled={isConnecting}
         onPress={onTogglePairing}
         style={({pressed}) => [
           styles.pairButton,
           isPreparingToPair && styles.cancelButton,
-          pressed && styles.buttonPressed,
+          isConnecting && styles.connectButtonDisabled,
+          pressed && !isConnecting && styles.buttonPressed,
         ]}
       >
         <Text
