@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {BleManager} from '@sfourdrinier/react-native-ble-plx';
+import {bleManager} from './bleManager';
 
 export type BluetoothState =
   | 'Unknown'
@@ -8,16 +8,6 @@ export type BluetoothState =
   | 'Unauthorized'
   | 'PoweredOff'
   | 'PoweredOn';
-
-let bleManager: BleManager | null = null;
-
-function getBleManager(): BleManager {
-  if (!bleManager) {
-    bleManager = new BleManager();
-  }
-
-  return bleManager;
-}
 
 export function useBluetoothState(isActive: boolean): BluetoothState {
   const [bluetoothState, setBluetoothState] =
@@ -28,9 +18,7 @@ export function useBluetoothState(isActive: boolean): BluetoothState {
       return;
     }
 
-    const manager = getBleManager();
-
-    const subscription = manager.onStateChange(newState => {
+    const subscription = bleManager.onStateChange(newState => {
       setBluetoothState(newState);
     }, true);
 

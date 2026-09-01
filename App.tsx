@@ -1,24 +1,20 @@
-import {useEffect, useState} from 'react';
-import {Alert, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {useMemo, useState} from 'react';
+import {
+  Alert,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 import {PairingCard} from './src/components/PairingCard';
 import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
 import {requestBluetoothPermissions} from './src/ble/requestBluetoothPermissions';
 import {useBluetoothState} from './src/ble/useBluetoothState';
-
-const previewScanResults: readonly DiscoveredWatch[] = [
-  {
-    id: 'preview-watch-1',
-    name: 'Smart Watch',
-    signalStrength: 'strong',
-  },
-  {
-    id: 'preview-watch-2',
-    name: 'Watch 7',
-    signalStrength: 'medium',
-  },
-];
+import {mapBleDeviceToDiscoveredWatch} from './src/ble/mapBleDeviceToDiscoveredWatch';
+import {useBleScan} from './src/ble/useBleScan';
 
 function App() {
   return (
@@ -35,31 +31,16 @@ function DashboardScreen() {
   const [connectedWatch, setConnectedWatch] = useState<DiscoveredWatch | null>(
     null,
   );
-  const [discoveredWatches, setDiscoveredWatches] = useState<
-    readonly DiscoveredWatch[]
-  >([]);
-  const [isScanning, setIsScanning] = useState(false);
   const bluetoothState = useBluetoothState(isPreparingToPair);
 
-  useEffect(() => {
-    if (!isPreparingToPair || bluetoothState !== 'PoweredOn') {
-      setDiscoveredWatches([]);
-      setIsScanning(false);
-      return;
-    }
+  const canScan = isPreparingToPair && bluetoothState === 'PoweredOn';
 
-    setDiscoveredWatches([]);
-    setIsScanning(true);
+  const {devices, isScanning} = useBleScan(canScan);
 
-    const scanTimer = setTimeout(() => {
-      setDiscoveredWatches(previewScanResults);
-      setIsScanning(false);
-    }, 1500);
-
-    return () => {
-      clearTimeout(scanTimer);
-    };
-  }, [bluetoothState, isPreparingToPair]);
+  const discoveredWatches = useMemo(
+    () => devices.map(mapBleDeviceToDiscoveredWatch),
+    [devices],
+  );
 
   async function handleTogglePairing() {
     if (isPreparingToPair) {
@@ -106,7 +87,11 @@ function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={styles.screen}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View>
           <Text style={styles.eyebrow}>SMARTWATCH</Text>
           <Text style={styles.title}>My Watch</Text>
@@ -137,14 +122,19 @@ function DashboardScreen() {
             onTogglePairing={handleTogglePairing}
           />
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {flex: 1, backgroundColor: '#F5F7FA'},
-  screen: {flex: 1, paddingHorizontal: 24, paddingTop: 24},
+  screen: {
+    flexGrow: 1,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+  },
   eyebrow: {
     color: '#5B6472',
     fontSize: 12,

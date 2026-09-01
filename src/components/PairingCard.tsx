@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -54,33 +55,40 @@ export function PairingCard({
               </Text>
             </View>
           )}
-          {watches.map(watch => {
-            const isSelected = watch.id === selectedWatchId;
-            return (
-              <Pressable
-                key={watch.id}
-                accessibilityRole="button"
-                accessibilityLabel={`Select ${watch.name}`}
-                accessibilityState={{selected: isSelected}}
-                onPress={() => onSelectWatch(watch.id)}
-                style={({pressed}) => [
-                  styles.deviceRow,
-                  isSelected && styles.deviceRowSelected,
-                  pressed && styles.deviceRowPressed,
-                ]}
-              >
-                <View>
-                  <Text style={styles.deviceName}>{watch.name}</Text>
-                  <Text style={styles.deviceSignal}>
-                    {watch.signalStrength} signal
+          <ScrollView
+            style={styles.deviceScroll}
+            contentContainerStyle={styles.deviceScrollContent}
+            showsVerticalScrollIndicator
+            nestedScrollEnabled
+          >
+            {watches.map(watch => {
+              const isSelected = watch.id === selectedWatchId;
+              return (
+                <Pressable
+                  key={watch.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${watch.name}`}
+                  accessibilityState={{selected: isSelected}}
+                  onPress={() => onSelectWatch(watch.id)}
+                  style={({pressed}) => [
+                    styles.deviceRow,
+                    isSelected && styles.deviceRowSelected,
+                    pressed && styles.deviceRowPressed,
+                  ]}
+                >
+                  <View>
+                    <Text style={styles.deviceName}>{watch.name}</Text>
+                    <Text style={styles.deviceSignal}>
+                      {watch.signalStrength} signal
+                    </Text>
+                  </View>
+                  <Text style={styles.deviceAction}>
+                    {isSelected ? 'Selected' : 'Select'}
                   </Text>
-                </View>
-                <Text style={styles.deviceAction}>
-                  {isSelected ? 'Selected' : 'Select'}
-                </Text>
-              </Pressable>
-            );
-          })}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
       )}
 
@@ -229,5 +237,11 @@ const styles = StyleSheet.create({
     color: '#687382',
     fontSize: 14,
     marginLeft: 12,
+  },
+  deviceScroll: {
+    maxHeight: 180,
+  },
+  deviceScrollContent: {
+    paddingBottom: 8,
   },
 });
