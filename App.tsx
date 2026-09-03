@@ -17,6 +17,7 @@ import {mapBleDeviceToDiscoveredWatch} from './src/ble/mapBleDeviceToDiscoveredW
 import {useBleScan} from './src/ble/useBleScan';
 import {connectToBleDevice} from './src/ble/connectToBleDevice';
 import {disconnectFromBleDevice} from './src/ble/disconnectFromBleDevice';
+import {useBleDisconnection} from './src/ble/useBleDisconnection';
 
 function App() {
   return (
@@ -43,6 +44,17 @@ function DashboardScreen() {
     () => devices.map(mapBleDeviceToDiscoveredWatch),
     [devices],
   );
+
+  useBleDisconnection(connectedWatch?.id ?? null, error => {
+    setConnectedWatch(null);
+
+    if (error) {
+      Alert.alert(
+        'Watch disconnected',
+        error.message || 'The Bluetooth connection was lost.',
+      );
+    }
+  });
 
   async function handleTogglePairing() {
     if (isPreparingToPair) {
