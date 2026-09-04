@@ -14,7 +14,7 @@ export function ConnectedWatchCard({
     <View style={styles.card}>
       <View style={styles.connectionHeader}>
         <View style={styles.connectedIndicator} />
-        <Text style={styles.connectedLabel}>Connected preview</Text>
+        <Text style={styles.connectedLabel}>Connected</Text>
       </View>
 
       <View style={styles.watchPlaceholder}>
@@ -24,7 +24,7 @@ export function ConnectedWatchCard({
       <Text style={styles.title}>{watch.name}</Text>
 
       <Text style={styles.description}>
-        Device information will appear here after a real BLE connection.
+        Bluetooth connection established successfully.
       </Text>
 
       <Pressable
@@ -36,7 +36,7 @@ export function ConnectedWatchCard({
           pressed && styles.buttonPressed,
         ]}
       >
-        <Text style={styles.disconnectButtonText}>Disconnect preview</Text>
+        <Text style={styles.disconnectButtonText}>Disconnect</Text>
       </Pressable>
     </View>
   );
