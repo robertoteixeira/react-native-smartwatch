@@ -16,6 +16,7 @@ import {useBluetoothState} from './src/ble/useBluetoothState';
 import {mapBleDeviceToDiscoveredWatch} from './src/ble/mapBleDeviceToDiscoveredWatch';
 import {useBleScan} from './src/ble/useBleScan';
 import {connectToBleDevice} from './src/ble/connectToBleDevice';
+import {getBleDeviceProfile} from './src/ble/getBleDeviceProfile';
 import {disconnectFromBleDevice} from './src/ble/disconnectFromBleDevice';
 import {useBleDisconnection} from './src/ble/useBleDisconnection';
 
@@ -93,7 +94,15 @@ function DashboardScreen() {
     setIsConnecting(true);
 
     try {
-      await connectToBleDevice(selectedWatch.id);
+      const connectedDevice = await connectToBleDevice(selectedWatch.id);
+
+      try {
+        const profile = await getBleDeviceProfile(connectedDevice);
+
+        console.info('BLE GATT profile:', JSON.stringify(profile, null, 2));
+      } catch (profileError) {
+        console.warn('Unable to inspect BLE GATT profile:', profileError);
+      }
 
       setConnectedWatch(selectedWatch);
       setIsPreparingToPair(false);
