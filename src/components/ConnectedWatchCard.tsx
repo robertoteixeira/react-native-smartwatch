@@ -1,8 +1,8 @@
 import {Pressable, StyleSheet, Text, View} from 'react-native';
-import type {DiscoveredWatch} from '../models/DiscoveredWatch';
+import type {ConnectedWatch} from '../models/ConnectedWatch';
 
 type ConnectedWatchCardProps = {
-  watch: DiscoveredWatch;
+  watch: ConnectedWatch;
   onDisconnect: () => void;
 };
 
@@ -22,6 +22,12 @@ export function ConnectedWatchCard({
       </View>
 
       <Text style={styles.title}>{watch.name}</Text>
+
+      <Text style={styles.battery}>
+        {watch.batteryLevel === null
+          ? 'Battery unavailable'
+          : `Battery ${watch.batteryLevel}%`}
+      </Text>
 
       <Text style={styles.description}>
         Bluetooth connection established successfully.
@@ -114,5 +120,11 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.75,
+  },
+  battery: {
+    color: '#24855A',
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 8,
   },
 });

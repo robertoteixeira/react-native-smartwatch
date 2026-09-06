@@ -10,7 +10,6 @@ import {
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 import {PairingCard} from './src/components/PairingCard';
-import type {DiscoveredWatch} from './src/models/DiscoveredWatch';
 import {requestBluetoothPermissions} from './src/ble/requestBluetoothPermissions';
 import {useBluetoothState} from './src/ble/useBluetoothState';
 import {mapBleDeviceToDiscoveredWatch} from './src/ble/mapBleDeviceToDiscoveredWatch';
@@ -19,6 +18,8 @@ import {connectToBleDevice} from './src/ble/connectToBleDevice';
 import {getBleDeviceProfile} from './src/ble/getBleDeviceProfile';
 import {disconnectFromBleDevice} from './src/ble/disconnectFromBleDevice';
 import {useBleDisconnection} from './src/ble/useBleDisconnection';
+import type {ConnectedWatch} from './src/models/ConnectedWatch';
+import {readBatteryLevel} from './src/ble/readBatteryLevel';
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
 function DashboardScreen() {
   const [isPreparingToPair, setIsPreparingToPair] = useState(false);
   const [selectedWatchId, setSelectedWatchId] = useState<string | null>(null);
-  const [connectedWatch, setConnectedWatch] = useState<DiscoveredWatch | null>(
+  const [connectedWatch, setConnectedWatch] = useState<ConnectedWatch | null>(
     null,
   );
   const [isConnecting, setIsConnecting] = useState(false);
@@ -104,7 +105,19 @@ function DashboardScreen() {
         console.warn('Unable to inspect BLE GATT profile:', profileError);
       }
 
-      setConnectedWatch(selectedWatch);
+      let batteryLevel: number | null = null;
+
+      try {
+        batteryLevel = await readBatteryLevel(selectedWatch.id);
+      } catch (batteryError) {
+        console.warn('Unable to read battery level:', batteryError);
+      }
+
+      setConnectedWatch({
+        ...selectedWatch,
+        batteryLevel,
+      });
+
       setIsPreparingToPair(false);
       setSelectedWatchId(null);
     } catch (error) {
@@ -112,6 +125,7 @@ function DashboardScreen() {
         error instanceof Error
           ? error.message
           : 'An unknown Bluetooth error occurred.';
+
       Alert.alert('Unable to connect', message);
     } finally {
       setIsConnecting(false);
