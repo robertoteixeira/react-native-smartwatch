@@ -15,9 +15,7 @@ function getSignalStrength(
   return 'medium';
 }
 
-export function mapBleDeviceToDiscoveredWatch(
-  device: Device,
-): DiscoveredWatch {
+export function mapBleDeviceToDiscoveredWatch(device: Device): DiscoveredWatch {
   return {
     id: device.id,
     name: device.name ?? device.localName ?? 'Unknown device',

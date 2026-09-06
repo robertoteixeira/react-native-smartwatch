@@ -1,7 +1,4 @@
-import type {
-  BleError,
-  Subscription,
-} from '@sfourdrinier/react-native-ble-plx';
+import type {BleError, Subscription} from '@sfourdrinier/react-native-ble-plx';
 import {bleManager} from './bleManager';
 
 export function monitorBleDisconnection(

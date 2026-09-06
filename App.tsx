@@ -18,6 +18,7 @@ import {connectToBleDevice} from './src/ble/connectToBleDevice';
 import {getBleDeviceProfile} from './src/ble/getBleDeviceProfile';
 import {disconnectFromBleDevice} from './src/ble/disconnectFromBleDevice';
 import {useBleDisconnection} from './src/ble/useBleDisconnection';
+import {useBatteryLevel} from './src/ble/useBatteryLevel';
 import type {ConnectedWatch} from './src/models/ConnectedWatch';
 import {readBatteryLevel} from './src/ble/readBatteryLevel';
 
@@ -57,6 +58,11 @@ function DashboardScreen() {
       );
     }
   });
+
+  const liveBatteryLevel = useBatteryLevel(
+    connectedWatch?.id ?? null,
+    connectedWatch?.batteryLevel ?? null,
+  );
 
   async function handleTogglePairing() {
     if (isPreparingToPair) {
@@ -173,7 +179,10 @@ function DashboardScreen() {
 
         {connectedWatch ? (
           <ConnectedWatchCard
-            watch={connectedWatch}
+            watch={{
+              ...connectedWatch,
+              batteryLevel: liveBatteryLevel,
+            }}
             onDisconnect={handleDisconnect}
           />
         ) : (
