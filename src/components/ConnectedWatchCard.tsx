@@ -3,11 +3,13 @@ import type {ConnectedWatch} from '../models/ConnectedWatch';
 
 type ConnectedWatchCardProps = {
   watch: ConnectedWatch;
+  heartRate: number | null;
   onDisconnect: () => void;
 };
 
 export function ConnectedWatchCard({
   watch,
+  heartRate,
   onDisconnect,
 }: ConnectedWatchCardProps) {
   return (
@@ -27,6 +29,12 @@ export function ConnectedWatchCard({
         {watch.batteryLevel === null
           ? 'Battery unavailable'
           : `Battery ${watch.batteryLevel}%`}
+      </Text>
+
+      <Text style={styles.heartRate}>
+        {heartRate === null
+          ? 'Waiting for heart rate…'
+          : `Heart rate ${heartRate} BPM`}
       </Text>
 
       <Text style={styles.description}>
@@ -123,6 +131,12 @@ const styles = StyleSheet.create({
   },
   battery: {
     color: '#24855A',
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 8,
+  },
+  heartRate: {
+    color: '#C4475A',
     fontSize: 16,
     fontWeight: '700',
     marginTop: 8,

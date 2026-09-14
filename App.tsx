@@ -21,6 +21,7 @@ import {useBleDisconnection} from './src/ble/useBleDisconnection';
 import {useBatteryLevel} from './src/ble/useBatteryLevel';
 import type {ConnectedWatch} from './src/models/ConnectedWatch';
 import {readBatteryLevel} from './src/ble/readBatteryLevel';
+import {useHeartRate} from './src/ble/useHeartRate';
 
 function App() {
   return (
@@ -63,6 +64,8 @@ function DashboardScreen() {
     connectedWatch?.id ?? null,
     connectedWatch?.batteryLevel ?? null,
   );
+
+  const heartRate = useHeartRate(connectedWatch?.id ?? null);
 
   async function handleTogglePairing() {
     if (isPreparingToPair) {
@@ -183,6 +186,7 @@ function DashboardScreen() {
               ...connectedWatch,
               batteryLevel: liveBatteryLevel,
             }}
+            heartRate={heartRate}
             onDisconnect={handleDisconnect}
           />
         ) : (
