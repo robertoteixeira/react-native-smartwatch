@@ -37,6 +37,38 @@ export function ConnectedWatchCard({
           : `Heart rate ${heartRate} BPM`}
       </Text>
 
+      {watch.deviceInformation && (
+        <View style={styles.deviceInformation}>
+          <View style={styles.informationRow}>
+            <Text style={styles.informationLabel}>Manufacturer</Text>
+            <Text style={styles.informationValue}>
+              {watch.deviceInformation.manufacturerName}
+            </Text>
+          </View>
+
+          <View style={styles.informationRow}>
+            <Text style={styles.informationLabel}>Software</Text>
+            <Text style={styles.informationValue}>
+              {watch.deviceInformation.softwareRevision}
+            </Text>
+          </View>
+
+          <View style={styles.informationRow}>
+            <Text style={styles.informationLabel}>Hardware</Text>
+            <Text style={styles.informationValue}>
+              {watch.deviceInformation.hardwareRevision}
+            </Text>
+          </View>
+
+          <View style={styles.informationRow}>
+            <Text style={styles.informationLabel}>Serial number</Text>
+            <Text style={styles.informationValue}>
+              {watch.deviceInformation.serialNumber}
+            </Text>
+          </View>
+        </View>
+      )}
+
       <Text style={styles.description}>
         Bluetooth connection established successfully.
       </Text>
@@ -140,5 +172,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginTop: 8,
+  },
+  deviceInformation: {
+    alignSelf: 'stretch',
+    backgroundColor: '#F5F7FA',
+    borderRadius: 14,
+    marginTop: 20,
+    padding: 16,
+  },
+  informationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 5,
+  },
+  informationLabel: {
+    color: '#687382',
+    fontSize: 14,
+  },
+  informationValue: {
+    color: '#17202A',
+    flexShrink: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 16,
+    textAlign: 'right',
   },
 });

@@ -21,6 +21,10 @@ import {useBleDisconnection} from './src/ble/useBleDisconnection';
 import {useBatteryLevel} from './src/ble/useBatteryLevel';
 import type {ConnectedWatch} from './src/models/ConnectedWatch';
 import {readBatteryLevel} from './src/ble/readBatteryLevel';
+import {
+  readDeviceInformation,
+  type DeviceInformation,
+} from './src/ble/readDeviceInformation';
 import {useHeartRate} from './src/ble/useHeartRate';
 
 function App() {
@@ -122,9 +126,21 @@ function DashboardScreen() {
         console.warn('Unable to read battery level:', batteryError);
       }
 
+      let deviceInformation: DeviceInformation | null = null;
+
+      try {
+        deviceInformation = await readDeviceInformation(selectedWatch.id);
+      } catch (deviceInformationError) {
+        console.warn(
+          'Unable to read device information:',
+          deviceInformationError,
+        );
+      }
+
       setConnectedWatch({
         ...selectedWatch,
         batteryLevel,
+        deviceInformation,
       });
 
       setIsPreparingToPair(false);
