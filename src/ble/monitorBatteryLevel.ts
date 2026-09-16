@@ -4,7 +4,7 @@ import {
   BATTERY_LEVEL_CHARACTERISTIC_UUID,
   BATTERY_SERVICE_UUID,
   decodeBatteryLevel,
-} from './readBatteryLevel';
+} from './batteryLevel';
 
 export function monitorBatteryLevel(
   deviceId: string,
