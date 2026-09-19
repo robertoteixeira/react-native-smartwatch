@@ -31,6 +31,7 @@ describe('connectToBleDevice', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -64,6 +65,30 @@ describe('connectToBleDevice', () => {
 
     await expect(connectToBleDevice('watch-1')).rejects.toBe(error);
 
+    expect(mockCancel).toHaveBeenCalledWith('watch-1');
+  });
+
+  it('times out service discovery and cleans up the connection', async () => {
+    jest.useFakeTimers();
+
+    discover.mockReturnValue(new Promise(() => {}));
+
+    const connectionPromise = connectToBleDevice('watch-1');
+
+    // Allow connectToDevice() to resolve and the discovery timer to start.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const rejection = connectionPromise.catch(error => error);
+
+    await jest.advanceTimersByTimeAsync(9_999);
+
+    expect(mockCancel).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(1);
+    const error = await rejection;
+
+    expect(error).toEqual(new Error('Bluetooth service discovery timed out.'));
     expect(mockCancel).toHaveBeenCalledWith('watch-1');
   });
 
