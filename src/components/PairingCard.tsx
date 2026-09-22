@@ -11,6 +11,7 @@ import type {DiscoveredWatch} from '../models/DiscoveredWatch';
 type PairingCardProps = {
   watches: readonly DiscoveredWatch[];
   isScanning: boolean;
+  scanError: string | null;
   isConnecting: boolean;
   isPreparingToPair: boolean;
   selectedWatchId: string | null;
@@ -22,6 +23,7 @@ type PairingCardProps = {
 export function PairingCard({
   watches,
   isScanning,
+  scanError,
   isConnecting,
   isPreparingToPair,
   selectedWatchId,
@@ -56,6 +58,15 @@ export function PairingCard({
                 Scanning for compatible watches…
               </Text>
             </View>
+          )}
+          {scanError && (
+            <Text
+              accessibilityRole="alert"
+              accessibilityLiveRegion="polite"
+              style={styles.scanError}
+            >
+              {scanError}
+            </Text>
           )}
           <ScrollView
             style={styles.deviceScroll}
@@ -248,5 +259,11 @@ const styles = StyleSheet.create({
   },
   deviceScrollContent: {
     paddingBottom: 8,
+  },
+  scanError: {
+    color: '#B42318',
+    fontSize: 14,
+    lineHeight: 20,
+    paddingVertical: 12,
   },
 });

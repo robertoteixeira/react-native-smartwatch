@@ -46,7 +46,7 @@ function DashboardScreen() {
 
   const bluetoothState = useBluetoothState(isPreparingToPair);
   const canScan = isPreparingToPair && bluetoothState === 'PoweredOn';
-  const {devices, isScanning} = useBleScan(canScan);
+  const {devices, isScanning, scanError} = useBleScan(canScan);
 
   const discoveredWatches = useMemo(
     () => devices.map(mapBleDeviceToDiscoveredWatch),
@@ -209,6 +209,7 @@ function DashboardScreen() {
           <PairingCard
             watches={discoveredWatches}
             isScanning={isScanning}
+            scanError={scanError}
             isConnecting={isConnecting}
             isPreparingToPair={isPreparingToPair}
             selectedWatchId={selectedWatchId}
