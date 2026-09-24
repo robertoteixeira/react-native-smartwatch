@@ -6,24 +6,36 @@ type BleScanResult = {
   devices: readonly Device[];
   isScanning: boolean;
   scanError: string | null;
+  hasCompletedScan: boolean;
+  restartScan: () => void;
 };
 
 export function useBleScan(isActive: boolean): BleScanResult {
   const [devices, setDevices] = useState<readonly Device[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [hasCompletedScan, setHasCompletedScan] = useState(false);
+  const [scanAttempt, setScanAttempt] = useState(0);
+
+  function restartScan() {
+    if (isActive) {
+      setScanAttempt(currentAttempt => currentAttempt + 1);
+    }
+  }
 
   useEffect(() => {
     if (!isActive) {
       setDevices([]);
       setIsScanning(false);
       setScanError(null);
+      setHasCompletedScan(false);
       return;
     }
 
     setDevices([]);
     setIsScanning(true);
     setScanError(null);
+    setHasCompletedScan(false);
 
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
@@ -53,13 +65,14 @@ export function useBleScan(isActive: boolean): BleScanResult {
     const scanTimer = setTimeout(() => {
       bleManager.stopDeviceScan();
       setIsScanning(false);
+      setHasCompletedScan(true);
     }, 10_000);
 
     return () => {
       clearTimeout(scanTimer);
       bleManager.stopDeviceScan();
     };
-  }, [isActive]);
+  }, [isActive, scanAttempt]);
 
-  return {devices, isScanning, scanError};
+  return {devices, isScanning, scanError, hasCompletedScan, restartScan};
 }

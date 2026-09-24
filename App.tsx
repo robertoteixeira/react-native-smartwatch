@@ -46,7 +46,8 @@ function DashboardScreen() {
 
   const bluetoothState = useBluetoothState(isPreparingToPair);
   const canScan = isPreparingToPair && bluetoothState === 'PoweredOn';
-  const {devices, isScanning, scanError} = useBleScan(canScan);
+  const {devices, isScanning, scanError, hasCompletedScan, restartScan} =
+    useBleScan(canScan);
 
   const discoveredWatches = useMemo(
     () => devices.map(mapBleDeviceToDiscoveredWatch),
@@ -210,12 +211,14 @@ function DashboardScreen() {
             watches={discoveredWatches}
             isScanning={isScanning}
             scanError={scanError}
+            hasCompletedScan={hasCompletedScan}
             isConnecting={isConnecting}
             isPreparingToPair={isPreparingToPair}
             selectedWatchId={selectedWatchId}
             onSelectWatch={handleSelectWatch}
             onConfirmSelection={handleConfirmSelection}
             onTogglePairing={handleTogglePairing}
+            onRetryScan={restartScan}
           />
         )}
       </ScrollView>

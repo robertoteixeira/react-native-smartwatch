@@ -12,24 +12,28 @@ type PairingCardProps = {
   watches: readonly DiscoveredWatch[];
   isScanning: boolean;
   scanError: string | null;
+  hasCompletedScan: boolean;
   isConnecting: boolean;
   isPreparingToPair: boolean;
   selectedWatchId: string | null;
   onSelectWatch: (watchId: string) => void;
   onConfirmSelection: () => void;
   onTogglePairing: () => void;
+  onRetryScan: () => void;
 };
 
 export function PairingCard({
   watches,
   isScanning,
   scanError,
+  hasCompletedScan,
   isConnecting,
   isPreparingToPair,
   selectedWatchId,
   onSelectWatch,
   onConfirmSelection,
   onTogglePairing,
+  onRetryScan,
 }: PairingCardProps) {
   const canConnect = selectedWatchId !== null && !isConnecting;
 
@@ -67,6 +71,23 @@ export function PairingCard({
             >
               {scanError}
             </Text>
+          )}
+          {hasCompletedScan && !scanError && watches.length === 0 && (
+            <Text style={styles.emptyScanText}>
+              No watches found. Move your watch closer and try again.
+            </Text>
+          )}
+          {!isScanning && (hasCompletedScan || scanError !== null) && (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onRetryScan}
+              style={({pressed}) => [
+                styles.retryButton,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.retryButtonText}>Scan again</Text>
+            </Pressable>
           )}
           <ScrollView
             style={styles.deviceScroll}
@@ -265,5 +286,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     paddingVertical: 12,
+  },
+  emptyScanText: {
+    color: '#687382',
+    fontSize: 14,
+    lineHeight: 20,
+    paddingVertical: 12,
+  },
+  retryButton: {
+    alignItems: 'center',
+    borderColor: '#1769E0',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryButtonText: {
+    color: '#1769E0',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
