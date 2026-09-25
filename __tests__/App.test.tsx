@@ -10,6 +10,10 @@ jest.mock('@sfourdrinier/react-native-ble-plx', () => ({
   })),
 }));
 
+jest.mock('../src/storage/pairedWatchStorage', () => ({
+  saveRememberedWatch: jest.fn(),
+}));
+
 test('renders correctly', async () => {
   await ReactTestRenderer.act(() => {
     ReactTestRenderer.create(<App />);

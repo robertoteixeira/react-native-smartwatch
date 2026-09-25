@@ -26,6 +26,7 @@ import {
   type DeviceInformation,
 } from './src/ble/readDeviceInformation';
 import {useHeartRate} from './src/ble/useHeartRate';
+import {saveRememberedWatch} from './src/storage/pairedWatchStorage';
 
 function App() {
   return (
@@ -143,6 +144,15 @@ function DashboardScreen() {
         batteryLevel,
         deviceInformation,
       });
+
+      try {
+        await saveRememberedWatch({
+          id: selectedWatch.id,
+          name: selectedWatch.name,
+        });
+      } catch (storageError) {
+        console.warn('Unable to remember paired watch:', storageError);
+      }
 
       setIsPreparingToPair(false);
       setSelectedWatchId(null);
