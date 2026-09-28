@@ -1,12 +1,10 @@
 import {createAsyncStorage} from '@react-native-async-storage/async-storage';
+import type {WatchIdentity} from '../models/WatchIdentity';
 
 const storage = createAsyncStorage('smartwatch');
 const PAIRED_WATCH_KEY = 'paired-watch';
 
-export type RememberedWatch = {
-  id: string;
-  name: string;
-};
+export type RememberedWatch = WatchIdentity;
 
 function isRememberedWatch(value: unknown): value is RememberedWatch {
   return (

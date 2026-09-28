@@ -140,7 +140,8 @@ function DashboardScreen() {
       }
 
       setConnectedWatch({
-        ...selectedWatch,
+        id: selectedWatch.id,
+        name: selectedWatch.name,
         batteryLevel,
         deviceInformation,
       });

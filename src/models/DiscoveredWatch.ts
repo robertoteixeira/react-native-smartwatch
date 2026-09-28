@@ -1,5 +1,5 @@
-export type DiscoveredWatch = {
-  id: string;
-  name: string;
+import type {WatchIdentity} from './WatchIdentity';
+
+export type DiscoveredWatch = WatchIdentity & {
   signalStrength: 'strong' | 'medium' | 'weak';
 };
