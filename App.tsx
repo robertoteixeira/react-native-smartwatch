@@ -27,6 +27,7 @@ import {
 } from './src/ble/readDeviceInformation';
 import {useHeartRate} from './src/ble/useHeartRate';
 import {saveRememberedWatch} from './src/storage/pairedWatchStorage';
+import type {WatchIdentity} from './src/models/WatchIdentity';
 
 function App() {
   return (
@@ -98,23 +99,14 @@ function DashboardScreen() {
     setSelectedWatchId(watchId);
   }
 
-  async function handleConfirmSelection() {
-    const selectedWatch = discoveredWatches.find(
-      watch => watch.id === selectedWatchId,
-    );
-
-    if (!selectedWatch) {
-      return;
-    }
-
+  async function connectWatch(watch: WatchIdentity) {
     setIsConnecting(true);
 
     try {
-      const connectedDevice = await connectToBleDevice(selectedWatch.id);
+      const connectedDevice = await connectToBleDevice(watch.id);
 
       try {
         const profile = await getBleDeviceProfile(connectedDevice);
-
         console.info('BLE GATT profile:', JSON.stringify(profile, null, 2));
       } catch (profileError) {
         console.warn('Unable to inspect BLE GATT profile:', profileError);
@@ -123,7 +115,7 @@ function DashboardScreen() {
       let batteryLevel: number | null = null;
 
       try {
-        batteryLevel = await readBatteryLevel(selectedWatch.id);
+        batteryLevel = await readBatteryLevel(watch.id);
       } catch (batteryError) {
         console.warn('Unable to read battery level:', batteryError);
       }
@@ -131,7 +123,7 @@ function DashboardScreen() {
       let deviceInformation: DeviceInformation | null = null;
 
       try {
-        deviceInformation = await readDeviceInformation(selectedWatch.id);
+        deviceInformation = await readDeviceInformation(watch.id);
       } catch (deviceInformationError) {
         console.warn(
           'Unable to read device information:',
@@ -140,17 +132,14 @@ function DashboardScreen() {
       }
 
       setConnectedWatch({
-        id: selectedWatch.id,
-        name: selectedWatch.name,
+        id: watch.id,
+        name: watch.name,
         batteryLevel,
         deviceInformation,
       });
 
       try {
-        await saveRememberedWatch({
-          id: selectedWatch.id,
-          name: selectedWatch.name,
-        });
+        await saveRememberedWatch(watch);
       } catch (storageError) {
         console.warn('Unable to remember paired watch:', storageError);
       }
@@ -167,6 +156,18 @@ function DashboardScreen() {
     } finally {
       setIsConnecting(false);
     }
+  }
+
+  async function handleConfirmSelection() {
+    const selectedWatch = discoveredWatches.find(
+      watch => watch.id === selectedWatchId,
+    );
+
+    if (!selectedWatch) {
+      return;
+    }
+
+    await connectWatch(selectedWatch);
   }
 
   async function handleDisconnect() {
