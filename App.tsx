@@ -1,5 +1,6 @@
 import {useMemo, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StatusBar,
@@ -10,6 +11,7 @@ import {
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {ConnectedWatchCard} from './src/components/ConnectedWatchCard';
 import {PairingCard} from './src/components/PairingCard';
+import {RememberedWatchCard} from './src/components/RememberedWatchCard';
 import {requestBluetoothPermissions} from './src/ble/requestBluetoothPermissions';
 import {useBluetoothState} from './src/ble/useBluetoothState';
 import {mapBleDeviceToDiscoveredWatch} from './src/ble/mapBleDeviceToDiscoveredWatch';
@@ -27,6 +29,7 @@ import {
 } from './src/ble/readDeviceInformation';
 import {useHeartRate} from './src/ble/useHeartRate';
 import {saveRememberedWatch} from './src/storage/pairedWatchStorage';
+import {useRememberedWatch} from './src/storage/useRememberedWatch';
 import type {WatchIdentity} from './src/models/WatchIdentity';
 
 function App() {
@@ -45,8 +48,10 @@ function DashboardScreen() {
     null,
   );
   const [isConnecting, setIsConnecting] = useState(false);
+  const {rememberedWatch, isLoadingRememberedWatch} = useRememberedWatch();
 
-  const bluetoothState = useBluetoothState(isPreparingToPair);
+  const shouldMonitorBluetooth = isPreparingToPair || rememberedWatch !== null;
+  const bluetoothState = useBluetoothState(shouldMonitorBluetooth);
   const canScan = isPreparingToPair && bluetoothState === 'PoweredOn';
   const {devices, isScanning, scanError, hasCompletedScan, restartScan} =
     useBleScan(canScan);
@@ -170,6 +175,38 @@ function DashboardScreen() {
     await connectWatch(selectedWatch);
   }
 
+  async function handleReconnect() {
+    if (!rememberedWatch) {
+      return;
+    }
+
+    const permissionGranted = await requestBluetoothPermissions();
+
+    if (!permissionGranted) {
+      Alert.alert(
+        'Bluetooth permission required',
+        'Allow access to nearby devices to reconnect your smartwatch.',
+      );
+      return;
+    }
+
+    if (bluetoothState !== 'PoweredOn') {
+      const message =
+        bluetoothState === 'PoweredOff'
+          ? 'Turn on Bluetooth before reconnecting your smartwatch.'
+          : bluetoothState === 'Unsupported'
+          ? 'Bluetooth Low Energy is not supported on this device.'
+          : bluetoothState === 'Unauthorized'
+          ? 'Bluetooth access is not authorized for this app.'
+          : 'Bluetooth is still becoming available. Wait a moment and try again.';
+
+      Alert.alert('Bluetooth unavailable', message);
+      return;
+    }
+
+    await connectWatch(rememberedWatch);
+  }
+
   async function handleDisconnect() {
     if (!connectedWatch) {
       return;
@@ -218,6 +255,18 @@ function DashboardScreen() {
             heartRate={heartRate}
             onDisconnect={handleDisconnect}
           />
+        ) : isLoadingRememberedWatch ? (
+          <View style={styles.loadingCard}>
+            <ActivityIndicator color="#1769E0" />
+            <Text style={styles.loadingText}>Loading paired watch…</Text>
+          </View>
+        ) : rememberedWatch && !isPreparingToPair ? (
+          <RememberedWatchCard
+            watch={rememberedWatch}
+            isConnecting={isConnecting}
+            onReconnect={handleReconnect}
+            onPairDifferentWatch={handleTogglePairing}
+          />
         ) : (
           <PairingCard
             watches={discoveredWatches}
@@ -262,6 +311,18 @@ const styles = StyleSheet.create({
   bluetoothState: {
     color: '#687382',
     fontSize: 13,
+    marginTop: 12,
+  },
+  loadingCard: {
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    marginTop: 32,
+    padding: 32,
+  },
+  loadingText: {
+    color: '#687382',
+    fontSize: 15,
     marginTop: 12,
   },
 });

@@ -14,6 +14,13 @@ jest.mock('../src/storage/pairedWatchStorage', () => ({
   saveRememberedWatch: jest.fn(),
 }));
 
+jest.mock('../src/storage/useRememberedWatch', () => ({
+  useRememberedWatch: jest.fn(() => ({
+    rememberedWatch: null,
+    isLoadingRememberedWatch: false,
+  })),
+}));
+
 test('renders correctly', async () => {
   await ReactTestRenderer.act(() => {
     ReactTestRenderer.create(<App />);

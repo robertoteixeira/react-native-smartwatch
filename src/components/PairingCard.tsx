@@ -1,8 +1,10 @@
+import {useState} from 'react';
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
@@ -35,7 +37,18 @@ export function PairingCard({
   onTogglePairing,
   onRetryScan,
 }: PairingCardProps) {
-  const canConnect = selectedWatchId !== null && !isConnecting;
+  const [hideUnknownDevices, setHideUnknownDevices] = useState(false);
+  const visibleWatches = hideUnknownDevices
+    ? watches.filter(
+        watch =>
+          watch.name.trim() !== '' &&
+          watch.name.trim().toLowerCase() !== 'unknown device',
+      )
+    : watches;
+  const canConnect =
+    selectedWatchId !== null &&
+    visibleWatches.some(watch => watch.id === selectedWatchId) &&
+    !isConnecting;
 
   return (
     <View style={styles.emptyCard}>
@@ -53,7 +66,19 @@ export function PairingCard({
 
       {isPreparingToPair && (
         <View style={styles.deviceList}>
-          <Text style={styles.deviceListTitle}>Nearby watches</Text>
+          <Text style={styles.deviceListTitle}>
+            Nearby watches ({visibleWatches.length})
+          </Text>
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Hide unknown devices</Text>
+            <Switch
+              accessibilityLabel="Hide unknown Bluetooth devices"
+              value={hideUnknownDevices}
+              onValueChange={setHideUnknownDevices}
+              trackColor={{false: '#CBD3DD', true: '#9FC4F8'}}
+              thumbColor={hideUnknownDevices ? '#1769E0' : '#FFFFFF'}
+            />
+          </View>
           {isScanning && (
             <View style={styles.scanningRow}>
               <ActivityIndicator color="#1769E0" />
@@ -72,9 +97,11 @@ export function PairingCard({
               {scanError}
             </Text>
           )}
-          {hasCompletedScan && !scanError && watches.length === 0 && (
+          {hasCompletedScan && !scanError && visibleWatches.length === 0 && (
             <Text style={styles.emptyScanText}>
-              No watches found. Move your watch closer and try again.
+              {hideUnknownDevices && watches.length > 0
+                ? 'No named devices found. Show unknown devices or scan again.'
+                : 'No watches found. Move your watch closer and try again.'}
             </Text>
           )}
           {!isScanning && (hasCompletedScan || scanError !== null) && (
@@ -95,7 +122,7 @@ export function PairingCard({
             showsVerticalScrollIndicator
             nestedScrollEnabled
           >
-            {watches.map(watch => {
+            {visibleWatches.map(watch => {
               const isSelected = watch.id === selectedWatchId;
               return (
                 <Pressable
@@ -245,6 +272,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: 'uppercase',
   },
+  filterRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  filterLabel: {
+    color: '#46515F',
+    fontSize: 14,
+  },
   deviceRow: {
     alignItems: 'center',
     borderColor: '#E2E7ED',
@@ -276,7 +313,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   deviceScroll: {
-    maxHeight: 180,
+    maxHeight: 300,
   },
   deviceScrollContent: {
     paddingBottom: 8,
