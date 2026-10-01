@@ -1,9 +1,14 @@
 import {useEffect, useState} from 'react';
-import {loadRememberedWatch, type RememberedWatch} from './pairedWatchStorage';
+import {
+  loadRememberedWatch,
+  saveRememberedWatch,
+  type RememberedWatch,
+} from './pairedWatchStorage';
 
 type RememberedWatchState = {
   rememberedWatch: RememberedWatch | null;
   isLoadingRememberedWatch: boolean;
+  rememberWatch: (watch: RememberedWatch) => Promise<void>;
 };
 
 export function useRememberedWatch(): RememberedWatchState {
@@ -38,8 +43,14 @@ export function useRememberedWatch(): RememberedWatchState {
     };
   }, []);
 
+  async function rememberWatch(watch: RememberedWatch): Promise<void> {
+    await saveRememberedWatch(watch);
+    setRememberedWatch(watch);
+  }
+
   return {
     rememberedWatch,
     isLoadingRememberedWatch,
+    rememberWatch,
   };
 }

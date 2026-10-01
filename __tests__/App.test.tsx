@@ -10,14 +10,11 @@ jest.mock('@sfourdrinier/react-native-ble-plx', () => ({
   })),
 }));
 
-jest.mock('../src/storage/pairedWatchStorage', () => ({
-  saveRememberedWatch: jest.fn(),
-}));
-
 jest.mock('../src/storage/useRememberedWatch', () => ({
   useRememberedWatch: jest.fn(() => ({
     rememberedWatch: null,
     isLoadingRememberedWatch: false,
+    rememberWatch: jest.fn(),
   })),
 }));
 

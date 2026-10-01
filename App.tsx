@@ -28,7 +28,6 @@ import {
   type DeviceInformation,
 } from './src/ble/readDeviceInformation';
 import {useHeartRate} from './src/ble/useHeartRate';
-import {saveRememberedWatch} from './src/storage/pairedWatchStorage';
 import {useRememberedWatch} from './src/storage/useRememberedWatch';
 import type {WatchIdentity} from './src/models/WatchIdentity';
 
@@ -48,7 +47,8 @@ function DashboardScreen() {
     null,
   );
   const [isConnecting, setIsConnecting] = useState(false);
-  const {rememberedWatch, isLoadingRememberedWatch} = useRememberedWatch();
+  const {rememberedWatch, isLoadingRememberedWatch, rememberWatch} =
+    useRememberedWatch();
 
   const shouldMonitorBluetooth = isPreparingToPair || rememberedWatch !== null;
   const bluetoothState = useBluetoothState(shouldMonitorBluetooth);
@@ -144,7 +144,7 @@ function DashboardScreen() {
       });
 
       try {
-        await saveRememberedWatch(watch);
+        await rememberWatch(watch);
       } catch (storageError) {
         console.warn('Unable to remember paired watch:', storageError);
       }
