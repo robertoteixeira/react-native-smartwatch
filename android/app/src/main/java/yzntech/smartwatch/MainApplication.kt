@@ -1,4 +1,4 @@
-package com.smartwatch
+package yzntech.smartwatch
 
 import android.app.Application
 import com.facebook.react.PackageList
