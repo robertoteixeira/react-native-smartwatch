@@ -6,6 +6,7 @@ type RememberedWatchCardProps = {
   isConnecting: boolean;
   onReconnect: () => void;
   onPairDifferentWatch: () => void;
+  onForgetWatch: () => void;
 };
 
 export function RememberedWatchCard({
@@ -13,6 +14,7 @@ export function RememberedWatchCard({
   isConnecting,
   onReconnect,
   onPairDifferentWatch,
+  onForgetWatch,
 }: RememberedWatchCardProps) {
   return (
     <View style={styles.card}>
@@ -58,6 +60,19 @@ export function RememberedWatchCard({
         ]}
       >
         <Text style={styles.secondaryButtonText}>Pair a different watch</Text>
+      </Pressable>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{disabled: isConnecting}}
+        disabled={isConnecting}
+        onPress={onForgetWatch}
+        style={({pressed}) => [
+          styles.forgetButton,
+          pressed && !isConnecting && styles.buttonPressed,
+        ]}
+      >
+        <Text style={styles.forgetButtonText}>Forget this watch</Text>
       </Pressable>
     </View>
   );
@@ -131,6 +146,16 @@ const styles = StyleSheet.create({
   },
   disabledButtonText: {
     color: '#8A95A3',
+  },
+  forgetButton: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  forgetButtonText: {
+    color: '#C4475A',
+    fontSize: 15,
+    fontWeight: '600',
   },
   buttonPressed: {
     opacity: 0.75,

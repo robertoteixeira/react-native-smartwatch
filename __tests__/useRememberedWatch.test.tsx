@@ -2,16 +2,19 @@ import React from 'react';
 import ReactTestRenderer, {act} from 'react-test-renderer';
 import {
   loadRememberedWatch,
+  removeRememberedWatch,
   saveRememberedWatch,
 } from '../src/storage/pairedWatchStorage';
 import {useRememberedWatch} from '../src/storage/useRememberedWatch';
 
 jest.mock('../src/storage/pairedWatchStorage', () => ({
   loadRememberedWatch: jest.fn(),
+  removeRememberedWatch: jest.fn(),
   saveRememberedWatch: jest.fn(),
 }));
 
 const mockLoadRememberedWatch = jest.mocked(loadRememberedWatch);
+const mockRemoveRememberedWatch = jest.mocked(removeRememberedWatch);
 const mockSaveRememberedWatch = jest.mocked(saveRememberedWatch);
 
 type RememberedWatchState = ReturnType<typeof useRememberedWatch>;
@@ -104,5 +107,25 @@ describe('useRememberedWatch', () => {
 
     expect(mockSaveRememberedWatch).toHaveBeenCalledWith(watch);
     expect(latestState?.rememberedWatch).toEqual(watch);
+  });
+
+  it('removes and clears the remembered watch', async () => {
+    const watch = {
+      id: 'watch-1',
+      name: 'My Watch',
+    };
+
+    mockLoadRememberedWatch.mockResolvedValue(watch);
+
+    await renderHook();
+
+    expect(latestState?.rememberedWatch).toEqual(watch);
+
+    await act(async () => {
+      await latestState?.forgetRememberedWatch();
+    });
+
+    expect(mockRemoveRememberedWatch).toHaveBeenCalledTimes(1);
+    expect(latestState?.rememberedWatch).toBeNull();
   });
 });

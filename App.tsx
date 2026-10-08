@@ -47,8 +47,12 @@ function DashboardScreen() {
     null,
   );
   const [isConnecting, setIsConnecting] = useState(false);
-  const {rememberedWatch, isLoadingRememberedWatch, rememberWatch} =
-    useRememberedWatch();
+  const {
+    rememberedWatch,
+    isLoadingRememberedWatch,
+    rememberWatch,
+    forgetRememberedWatch,
+  } = useRememberedWatch();
 
   const shouldMonitorBluetooth = isPreparingToPair || rememberedWatch !== null;
   const bluetoothState = useBluetoothState(shouldMonitorBluetooth);
@@ -207,6 +211,38 @@ function DashboardScreen() {
     await connectWatch(rememberedWatch);
   }
 
+  function handleForgetWatch() {
+    if (!rememberedWatch) {
+      return;
+    }
+
+    Alert.alert(
+      'Forget this watch?',
+      `${rememberedWatch.name} will be removed from this app.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Forget',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await forgetRememberedWatch();
+            } catch (error) {
+              const message =
+                error instanceof Error
+                  ? error.message
+                  : 'The remembered watch could not be removed.';
+              Alert.alert('Unable to forget watch', message);
+            }
+          },
+        },
+      ],
+    );
+  }
+
   async function handleDisconnect() {
     if (!connectedWatch) {
       return;
@@ -266,6 +302,7 @@ function DashboardScreen() {
             isConnecting={isConnecting}
             onReconnect={handleReconnect}
             onPairDifferentWatch={handleTogglePairing}
+            onForgetWatch={handleForgetWatch}
           />
         ) : (
           <PairingCard
