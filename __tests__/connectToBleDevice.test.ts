@@ -18,7 +18,7 @@ describe('connectToBleDevice', () => {
 
   const connectedDevice = {
     discoverAllServicesAndCharacteristics: discover,
-  } as Device;
+  } as unknown as Device;
 
   const discoveredDevice = {id: 'watch-1'} as Device;
 
