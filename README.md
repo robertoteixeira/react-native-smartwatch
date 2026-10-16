@@ -1,97 +1,95 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# React Native Smartwatch
 
-# Getting Started
+A React Native and TypeScript prototype for exploring Bluetooth Low Energy devices from iOS and Android. It covers scanning, connection management, GATT inspection, and live readings from compatible peripherals.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- Scan nearby BLE peripherals in 10-second windows, select a device, and retry a scan.
+- Request platform-specific Bluetooth permissions and display Bluetooth state.
+- Connect with a 15-second timeout and bound service discovery to 10 seconds.
+- Inspect services and characteristic capabilities.
+- Read battery level and subscribe to battery and heart-rate updates.
+- Read manufacturer, serial number, hardware revision, and software revision.
+- Handle disconnections, remember a device locally, reconnect, and forget it.
+- Test connection behavior, value decoding, subscriptions, hooks, and persistence with Jest.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Stack
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+React Native 0.87, React 19, TypeScript, `@sfourdrinier/react-native-ble-plx`, AsyncStorage, and Jest. Native projects are included for Android and iOS.
 
-```sh
-# Using npm
-npm start
+## Run locally
 
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+Use a Node version supported by `package.json` (`^22.13.0`, `^24.3.0`, or `>=26.0.0`), npm, and the native toolchain for your target platform. Android requires an SDK and compatible JDK; iOS requires macOS, Xcode, Ruby/Bundler, and CocoaPods.
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+git clone https://github.com/robertoteixeira/react-native-smartwatch.git
+cd react-native-smartwatch
+npm ci
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+For iOS, install native dependencies:
 
 ```sh
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
+cd ios
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Start Metro, then run the target in a second terminal:
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npm start
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+```sh
+npm run android
+# or
+npm run ios
+```
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Use a physical phone and an accessible BLE peripheral to exercise the complete Bluetooth flow. Enable Bluetooth and grant the requested permission. Android 12+ requests scan/connect permissions; earlier Android versions use location permission for scanning.
 
-## Step 3: Modify your app
+### Android signing setup
 
-Now that you have successfully run the app, let's make changes!
+The current Gradle configuration references `SMARTWATCH_UPLOAD_STORE_FILE`, `SMARTWATCH_UPLOAD_STORE_PASSWORD`, `SMARTWATCH_UPLOAD_KEY_ALIAS`, and `SMARTWATCH_UPLOAD_KEY_PASSWORD` during project configuration. Until signing configuration is made conditional, these private Gradle properties must be supplied even for a debug checkout. Keep real signing material outside source control. The checked-in debug keystore is for development only.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+For iOS, select your own development team in Xcode before deploying to a physical device.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Try the BLE flow
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+1. Start a scan and select an advertising peripheral.
+2. Connect and inspect its discovered GATT profile.
+3. On a compatible device, inspect battery, device information, and heart-rate readings.
+4. Disconnect, reconnect using the remembered-device card, or forget the device.
 
-## Congratulations! :tada:
+The app uses standard GATT services:
 
-You've successfully run and modified your React Native App. :partying_face:
+| Data | Service | Characteristic |
+| --- | --- | --- |
+| Battery level | `180F` | `2A19` |
+| Heart-rate measurement | `180D` | `2A37` |
+| Device information | `180A` | `2A25`, `2A27`, `2A28`, `2A29` |
 
-### Now what?
+These short UUIDs use the Bluetooth base UUID. A device must expose the relevant service and characteristic for a reading to work. Many consumer watches use proprietary protocols and will not support these flows. Remembering a device in the app does not establish OS-level Bluetooth bonding.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Validation
 
-# Troubleshooting
+```sh
+npm run check
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+This runs TypeScript, ESLint, and Jest. You can also run `npm run typecheck`, `npm run lint`, or `npm test -- --runInBand --watchman=false` individually. Mock-based tests do not verify radio behavior, native builds, or compatibility with a particular watch.
 
-# Learn More
+## Code layout
 
-To learn more about React Native, take a look at the following resources:
+- `src/ble/`: Bluetooth manager, permissions, connection workflow, GATT reads, decoding, subscriptions, and hooks.
+- `src/components/`: discovery, connected-device, and remembered-device UI.
+- `src/storage/`: local device identity persistence.
+- `src/models/`: shared device models.
+- `__tests__/`: Jest tests.
+- `android/` and `ios/`: native projects.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Project status
+
+Personal learning prototype. It is not a medical device, a universal smartwatch companion, or a production-ready health application. Remembered device identifiers and names are stored using AsyncStorage. No cloud service is required by the implemented BLE flow.
